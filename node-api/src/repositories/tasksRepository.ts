@@ -1,37 +1,65 @@
-interface Task {
-  id: number;
-  text: string;
-  summary: string | null;
-}
+import fs from "fs";
+import path from "path";
+
+// Caminho para o arquivo de tarefas
+const tasksFilePath = path.join(__dirname, "tasks.json");
 
 export class TasksRepository {
-  private tasks: Task[] = [];
-  private currentId: number = 1;
-
-  createTask(text: string): Task {
-    const task: Task = {
-      id: this.currentId++,
-      text,
-      summary: null
-    };
-    this.tasks.push(task);
-    return task;
+  // Carregar tarefas do arquivo
+  loadTasksFromFile() {
+    if (fs.existsSync(tasksFilePath)) {
+      const fileData = fs.readFileSync(tasksFilePath, "utf-8");
+      return JSON.parse(fileData);
+    }
+    return [];
   }
 
-  updateTask(id: number, summary: string): Task | null {
-    const taskIndex = this.tasks.findIndex(t => t.id === id);
-    if (taskIndex > -1) {
-      this.tasks[taskIndex].summary = summary;
-      return this.tasks[taskIndex];
+  // Salvar tarefas no arquivo
+  saveTasksToFile(tasks: any[]) {
+    fs.writeFileSync(tasksFilePath, JSON.stringify(tasks, null, 2));
+  }
+
+  // Criar uma nova tarefa
+  createTask(text: string, lang: string) {
+    const tasks = this.loadTasksFromFile();
+    const newTask = {
+      id: tasks.length ? tasks[tasks.length - 1].id + 1 : 1,
+      text,
+      summary: "",
+      lang,
+    };
+    tasks.push(newTask);
+    this.saveTasksToFile(tasks);
+    return newTask;
+  }
+
+  // Obter uma tarefa pelo ID
+  getTaskById(id: number) {
+    const tasks = this.loadTasksFromFile();
+    return tasks.find((task: any) => task.id === id);
+  }
+
+  // Atualizar uma tarefa com o resumo gerado
+  updateTask(id: number, summary: string) {
+    const tasks = this.loadTasksFromFile();
+    const taskIndex = tasks.findIndex((task: any) => task.id === id);
+    if (taskIndex !== -1) {
+      tasks[taskIndex].summary = summary;
+      this.saveTasksToFile(tasks);
+      return tasks[taskIndex];
     }
     return null;
   }
 
-  getTaskById(id: number): Task | null {
-    return this.tasks.find(t => t.id === id) || null;
-  }
-
-  getAllTasks(): Task[] {
-    return this.tasks;
+  // Deletar uma tarefa pelo ID
+  deleteTask(id: number) {
+    const tasks = this.loadTasksFromFile();
+    const taskIndex = tasks.findIndex((task: any) => task.id === id);
+    if (taskIndex !== -1) {
+      const deletedTask = tasks.splice(taskIndex, 1);
+      this.saveTasksToFile(tasks);
+      return deletedTask[0];
+    }
+    return null;
   }
 }
