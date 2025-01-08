@@ -1,11 +1,9 @@
 import fs from "fs";
 import path from "path";
 
-// Caminho para o arquivo de tarefas
 const tasksFilePath = path.join(__dirname, "tasks.json");
 
 export class TasksRepository {
-  // Carregar tarefas do arquivo
   loadTasksFromFile() {
     if (fs.existsSync(tasksFilePath)) {
       const fileData = fs.readFileSync(tasksFilePath, "utf-8");
@@ -14,12 +12,10 @@ export class TasksRepository {
     return [];
   }
 
-  // Salvar tarefas no arquivo
   saveTasksToFile(tasks: any[]) {
     fs.writeFileSync(tasksFilePath, JSON.stringify(tasks, null, 2));
   }
 
-  // Criar uma nova tarefa
   createTask(text: string, lang: string) {
     const tasks = this.loadTasksFromFile();
     const newTask = {
@@ -33,13 +29,11 @@ export class TasksRepository {
     return newTask;
   }
 
-  // Obter uma tarefa pelo ID
   getTaskById(id: number) {
     const tasks = this.loadTasksFromFile();
     return tasks.find((task: any) => task.id === id);
   }
 
-  // Atualizar uma tarefa com o resumo gerado
   updateTask(id: number, summary: string) {
     const tasks = this.loadTasksFromFile();
     const taskIndex = tasks.findIndex((task: any) => task.id === id);
@@ -51,7 +45,6 @@ export class TasksRepository {
     return null;
   }
 
-  // Deletar uma tarefa pelo ID
   deleteTask(id: number) {
     const tasks = this.loadTasksFromFile();
     const taskIndex = tasks.findIndex((task: any) => task.id === id);
